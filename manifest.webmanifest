@@ -1,0 +1,12 @@
+{
+  "name": "מחשבון תלושים",
+  "short_name": "תלושים",
+  "description": "חישוב מהיר ואלגנטי של תלושי 10 ו-7 נקודות",
+  "lang": "he",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4efe7",
+  "theme_color": "#17342d"
+}

@@ -1,0 +1,900 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#17342d" />
+  <title>מחשבון תלושים</title>
+  <style>
+    :root{
+      --bg-1:#f4efe7;
+      --bg-2:#ebe3d8;
+      --card:rgba(255,255,255,.78);
+      --card-strong:#fffdfa;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --line:rgba(23,52,45,.10);
+      --line-strong:rgba(23,52,45,.18);
+      --brand:#17342d;
+      --brand-2:#295347;
+      --accent:#c89f52;
+      --good:#1f7a4f;
+      --warn:#a7630f;
+      --shadow:0 18px 45px rgba(28,32,38,.10);
+      --radius-xl:28px;
+      --radius-lg:22px;
+      --radius-md:16px;
+      --radius-sm:12px;
+    }
+
+    *{box-sizing:border-box}
+
+    html,body{min-height:100%}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top right, rgba(200,159,82,.22), transparent 26%),
+        radial-gradient(circle at top left, rgba(41,83,71,.10), transparent 34%),
+        linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
+      display:flex;
+      justify-content:center;
+      padding:18px 14px 32px;
+    }
+
+    .app{
+      width:min(100%, 560px);
+    }
+
+    .topbar{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:14px;
+    }
+
+    h1{
+      margin:0;
+      font-size:30px;
+      line-height:1.05;
+      letter-spacing:-.02em;
+      color:var(--brand);
+    }
+
+    .subtitle{
+      margin-top:6px;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.35;
+    }
+
+    .pill{
+      flex-shrink:0;
+      background:rgba(255,255,255,.72);
+      border:1px solid rgba(255,255,255,.7);
+      color:var(--brand);
+      box-shadow:var(--shadow);
+      border-radius:999px;
+      padding:10px 14px;
+      font-size:12px;
+      font-weight:800;
+      backdrop-filter:blur(10px);
+    }
+
+    .panel{
+      background:var(--card);
+      border:1px solid rgba(255,255,255,.65);
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(18px);
+      border-radius:var(--radius-xl);
+      padding:16px;
+      margin-bottom:14px;
+    }
+
+    .hero{
+      position:relative;
+      overflow:hidden;
+    }
+
+    .hero::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(135deg, rgba(23,52,45,.965) 0%, rgba(41,83,71,.93) 100%);
+      z-index:0;
+      border-radius:inherit;
+    }
+
+    .hero::after{
+      content:"";
+      position:absolute;
+      inset:auto -18% -40% auto;
+      width:240px;
+      height:240px;
+      background:radial-gradient(circle, rgba(200,159,82,.32), transparent 62%);
+      z-index:0;
+      pointer-events:none;
+    }
+
+    .hero > *{position:relative; z-index:1}
+
+    .section-label{
+      color:rgba(255,255,255,.72);
+      font-size:12px;
+      font-weight:800;
+      margin-bottom:8px;
+      letter-spacing:.02em;
+    }
+
+    .hero-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:10px;
+      margin-bottom:6px;
+    }
+
+    .hero-total{
+      color:white;
+      font-size:17px;
+      font-weight:800;
+      line-height:1.3;
+    }
+
+    .hero-total strong{display:block;font-size:34px;line-height:1;margin-top:3px}
+
+    .status-chip{
+      border-radius:999px;
+      padding:9px 12px;
+      font-size:12px;
+      font-weight:900;
+      white-space:nowrap;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.12);
+      color:#fff8e7;
+    }
+
+    .status-chip.exact{
+      color:#e7fff1;
+      background:rgba(51,156,95,.18);
+    }
+
+    .status-chip.warn{
+      color:#fff4d8;
+      background:rgba(199,144,53,.18);
+    }
+
+    .instruction{
+      border-radius:18px;
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.10);
+      padding:12px 14px;
+      color:white;
+      margin:10px 0 14px;
+    }
+
+    .instruction .title{
+      font-size:13px;
+      opacity:.82;
+      margin-bottom:3px;
+      font-weight:700;
+    }
+
+    .instruction .value{
+      font-size:22px;
+      font-weight:900;
+      line-height:1.15;
+      letter-spacing:-.02em;
+    }
+
+    .coupon-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin-bottom:12px;
+    }
+
+    .coupon-box{
+      background:rgba(255,255,255,.10);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:22px;
+      padding:14px 12px;
+      text-align:center;
+      color:white;
+    }
+
+    .coupon-box .caption{
+      font-size:12px;
+      opacity:.8;
+      margin-bottom:10px;
+      font-weight:800;
+    }
+
+    .coupon-box .count{
+      font-size:50px;
+      line-height:.95;
+      font-weight:1000;
+      letter-spacing:-.03em;
+      margin-bottom:4px;
+    }
+
+    .coupon-box .unit{
+      font-size:15px;
+      font-weight:800;
+    }
+
+    .summary-row{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:10px;
+    }
+
+    .summary-item{
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:16px;
+      padding:11px 12px;
+      color:#f8fafc;
+    }
+
+    .summary-item .k{
+      font-size:12px;
+      opacity:.74;
+      margin-bottom:4px;
+      font-weight:700;
+    }
+
+    .summary-item .v{
+      font-size:18px;
+      font-weight:900;
+    }
+
+    .alt-box{
+      margin-top:12px;
+      border-radius:18px;
+      background:rgba(255,255,255,.95);
+      border:1px solid rgba(255,255,255,.75);
+      padding:13px 14px;
+      color:var(--text);
+    }
+
+    .alt-title{
+      font-size:13px;
+      color:var(--muted);
+      font-weight:800;
+      margin-bottom:6px;
+    }
+
+    .alt-main{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      font-size:16px;
+      font-weight:900;
+      color:var(--brand);
+    }
+
+    .alt-note{
+      color:var(--muted);
+      font-size:13px;
+      margin-top:6px;
+      line-height:1.35;
+    }
+
+    .options-title{
+      margin-top:14px;
+      margin-bottom:8px;
+      color:rgba(255,255,255,.76);
+      font-size:12px;
+      font-weight:900;
+      letter-spacing:.02em;
+    }
+
+    .payment-options{
+      display:grid;
+      gap:8px;
+    }
+
+    .payment-option{
+      background:rgba(255,255,255,.95);
+      border:1px solid rgba(255,255,255,.78);
+      border-radius:17px;
+      padding:12px 13px;
+      color:var(--text);
+    }
+
+    .payment-option-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:7px;
+    }
+
+    .payment-option-badge{
+      font-size:11px;
+      font-weight:900;
+      color:var(--brand);
+      background:rgba(23,52,45,.08);
+      border-radius:999px;
+      padding:5px 8px;
+      white-space:nowrap;
+    }
+
+    .payment-option-action{
+      font-size:13px;
+      font-weight:900;
+      color:var(--warn);
+    }
+
+    .payment-option-action.exact{color:var(--good)}
+
+    .payment-option-main{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      color:var(--brand);
+      font-size:16px;
+      font-weight:1000;
+    }
+
+    .payment-option-meta{
+      margin-top:6px;
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .edit-total-btn{
+      width:100%;
+      margin-top:12px;
+      background:rgba(255,255,255,.95);
+      color:var(--brand);
+      border:1px solid rgba(255,255,255,.75);
+      box-shadow:none;
+      font-size:15px;
+      padding:11px 14px;
+    }
+
+    .input-card{
+      padding:16px;
+    }
+
+    label{
+      display:block;
+      font-weight:900;
+      color:var(--brand);
+      margin-bottom:10px;
+    }
+
+    .input-shell{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      background:var(--card-strong);
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:10px 12px;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.9);
+    }
+
+    .input-prefix{
+      color:var(--muted);
+      font-weight:800;
+      font-size:15px;
+      white-space:nowrap;
+    }
+
+    input{
+      width:100%;
+      border:none;
+      background:transparent;
+      outline:none;
+      text-align:center;
+      color:var(--brand);
+      font-size:42px;
+      font-weight:1000;
+      letter-spacing:-.04em;
+      padding:8px 4px;
+      font-variant-numeric:tabular-nums;
+    }
+
+    input::placeholder{color:#b8b6b0}
+
+    .actions-grid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:10px;
+      margin-top:12px;
+    }
+
+    button{
+      appearance:none;
+      border:none;
+      border-radius:16px;
+      padding:14px 10px;
+      font-size:18px;
+      font-weight:900;
+      cursor:pointer;
+      transition:transform .06s ease, box-shadow .18s ease, background .18s ease;
+    }
+
+    button:active{transform:translateY(1px) scale(.985)}
+
+    .btn-light{
+      background:#fffdfa;
+      color:var(--brand);
+      border:1px solid var(--line);
+      box-shadow:0 4px 18px rgba(0,0,0,.04);
+    }
+
+    .btn-accent{
+      background:linear-gradient(180deg, #1d463b 0%, #17342d 100%);
+      color:white;
+      box-shadow:0 12px 24px rgba(23,52,45,.18);
+    }
+
+    .input-hint{
+      margin-top:10px;
+      color:var(--muted);
+      font-size:13px;
+      text-align:center;
+    }
+
+    details.panel{
+      padding:0;
+      overflow:hidden;
+    }
+
+    details > summary{
+      list-style:none;
+      cursor:pointer;
+      padding:15px 16px;
+      font-weight:900;
+      color:var(--brand);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    details > summary::-webkit-details-marker{display:none}
+
+    details > summary::after{
+      content:"⌄";
+      font-size:18px;
+      color:var(--muted);
+      transform:translateY(-1px);
+      transition:transform .2s ease;
+    }
+
+    details[open] > summary::after{transform:rotate(180deg)}
+
+    .details-body{
+      border-top:1px solid var(--line);
+      padding:0 16px 16px;
+    }
+
+    .settings-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-top:14px;
+    }
+
+    .settings-row p{
+      margin:0;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.4;
+    }
+
+    select{
+      min-width:78px;
+      font-size:16px;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid var(--line-strong);
+      background:#fffdfa;
+      color:var(--brand);
+      font-weight:800;
+      outline:none;
+    }
+
+    .history-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-top:14px;
+      margin-bottom:8px;
+    }
+
+    .mini-btn{
+      padding:8px 12px;
+      border-radius:12px;
+      font-size:13px;
+      background:#fffdfa;
+      color:var(--brand);
+      border:1px solid var(--line);
+    }
+
+    .history-list{display:grid;gap:8px}
+
+    .history-item{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      background:#fffdfa;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:11px 12px;
+    }
+
+    .history-main{
+      font-size:15px;
+      font-weight:900;
+      color:var(--brand);
+    }
+
+    .history-sub{
+      color:var(--muted);
+      font-size:12px;
+      margin-top:3px;
+    }
+
+    .empty{
+      color:var(--muted);
+      text-align:center;
+      padding:18px 10px;
+      line-height:1.45;
+    }
+
+    .footer{
+      text-align:center;
+      color:var(--muted);
+      font-size:12px;
+      padding:4px 10px 0;
+    }
+
+    .footer strong{color:var(--brand)}
+
+    @media (max-width:420px){
+      body{padding:12px 10px 24px}
+      h1{font-size:26px}
+      .coupon-box .count{font-size:44px}
+      input{font-size:38px}
+      .actions-grid{gap:8px}
+      button{padding:13px 8px;font-size:17px}
+      .summary-row{grid-template-columns:1fr}
+      .alt-main{font-size:15px}
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <div class="topbar">
+      <div>
+        <h1>מחשבון תלושים</h1>
+        <div class="subtitle">מותאם לקופה: תוצאה גדולה, חישוב מיידי, ומינימום תלושי 7 לפני הכול.</div>
+      </div>
+      <div class="pill">10 + 7 נק׳</div>
+    </div>
+
+    <section class="panel input-card">
+      <label for="total">הקלד את סה״כ הנקודות בקופה</label>
+      <div class="input-shell">
+        <div class="input-prefix">נקודות</div>
+        <input id="total" type="number" min="0" inputmode="numeric" pattern="[0-9]*" placeholder="0" autofocus />
+      </div>
+      <div class="actions-grid">
+        <button type="button" class="btn-accent" data-add="1">+1</button>
+        <button type="button" class="btn-accent" data-add="10">+10</button>
+        <button type="button" class="btn-light" data-sub="1">-1</button>
+        <button type="button" class="btn-light" id="backspace">⌫</button>
+        <button type="button" class="btn-light" id="clear" style="grid-column:1 / -1;">איפוס</button>
+      </div>
+      <div class="input-hint">אפשר להקליד את המספר ישירות בשדה. הכפתורים הם רק לקיצור דרך.</div>
+    </section>
+
+    <section class="panel hero" id="resultCard" aria-live="polite">
+      <div class="section-label">המלצה מיידית</div>
+      <div class="empty" style="color:rgba(255,255,255,.78);padding:26px 12px;">הקלד את סך הנקודות כדי לקבל את צירוף התשלום המומלץ.</div>
+    </section>
+
+    <details class="panel">
+      <summary>אפשרויות נוספות</summary>
+      <div class="details-body">
+        <div class="settings-row">
+          <div>
+            <strong>מקסימום השלמה</strong>
+            <p>כמה נקודות מותר להוסיף באמצעות מוצר קטן כדי להגיע לשילוב יעיל עם פחות תלושים, ובתוך זה פחות תלושי 7.</p>
+          </div>
+          <select id="maxExtra">
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3" selected>3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
+        </div>
+
+        <div class="history-head">
+          <strong>חישובים אחרונים</strong>
+          <button type="button" class="mini-btn" id="clearHistory">נקה</button>
+        </div>
+        <div id="history" class="empty">עדיין אין היסטוריה.</div>
+      </div>
+    </details>
+
+    <div class="footer">החישוב מתבצע <strong>מקומית במכשיר</strong> ואינו דורש אינטרנט.</div>
+  </main>
+
+<script>
+(() => {
+  const totalEl = document.getElementById('total');
+  const resultCard = document.getElementById('resultCard');
+  const maxExtraEl = document.getElementById('maxExtra');
+  const historyEl = document.getElementById('history');
+  const HISTORY_KEY = 'couponHistoryElegant';
+  let history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+
+  function pluralPoints(n){
+    return n === 1 ? 'נקודה' : 'נקודות';
+  }
+
+  function bestExact(target) {
+    let best = null;
+    for (let sevens = 0; sevens <= Math.floor(target / 7); sevens++) {
+      const rem = target - 7 * sevens;
+      if (rem >= 0 && rem % 10 === 0) {
+        const tens = rem / 10;
+        const cand = { tens, sevens, total: target };
+        if (!best || cand.sevens < best.sevens || (cand.sevens === best.sevens && cand.tens > best.tens)) {
+          best = cand;
+        }
+      }
+    }
+    return best;
+  }
+
+  function paymentCandidates(total, maxExtra) {
+    const candidates = [];
+    for (let extra = 0; extra <= maxExtra; extra++) {
+      const target = total + extra;
+      for (let sevens = 0; sevens <= Math.floor(target / 7); sevens++) {
+        const rem = target - 7 * sevens;
+        if (rem >= 0 && rem % 10 === 0) {
+          const tens = rem / 10;
+          candidates.push({ tens, sevens, total: target, extra, couponCount: tens + sevens });
+        }
+      }
+    }
+    candidates.sort((a,b) =>
+      a.couponCount - b.couponCount ||
+      a.sevens - b.sevens ||
+      a.extra - b.extra ||
+      b.tens - a.tens
+    );
+    return candidates;
+  }
+
+  function bestPlan(total, maxExtra) {
+    return paymentCandidates(total, maxExtra)[0] || null;
+  }
+
+  // Keep meaningful trade-offs. An option is hidden only when another one is
+  // no worse in total coupon count, 7-point coupons and added points — and better in at least one.
+  function usefulAlternatives(total, maxExtra, selectedPlan) {
+    const all = paymentCandidates(total, maxExtra);
+    const frontier = all.filter(c => !all.some(other => {
+      if (other === c) return false;
+      const noWorse = other.couponCount <= c.couponCount && other.sevens <= c.sevens && other.extra <= c.extra;
+      const strictlyBetter = other.couponCount < c.couponCount || other.sevens < c.sevens || other.extra < c.extra;
+      return noWorse && strictlyBetter;
+    }));
+
+    return frontier
+      .filter(c => !(c.tens === selectedPlan.tens && c.sevens === selectedPlan.sevens && c.extra === selectedPlan.extra))
+      .sort((a,b) =>
+        a.couponCount - b.couponCount ||
+        a.sevens - b.sevens ||
+        a.extra - b.extra
+      )
+      .slice(0, 3);
+  }
+
+  function renderResult() {
+    const raw = totalEl.value.trim();
+    if (!raw) {
+      resultCard.innerHTML = `
+        <div class="section-label">המלצה מיידית</div>
+        <div class="empty" style="color:rgba(255,255,255,.78);padding:26px 12px;">הקלד את סך הנקודות כדי לקבל את צירוף התשלום המומלץ.</div>`;
+      return;
+    }
+
+    const total = Number(raw);
+    if (!Number.isFinite(total) || total < 0 || !Number.isInteger(total)) {
+      resultCard.innerHTML = `
+        <div class="section-label">המלצה מיידית</div>
+        <div class="empty" style="color:rgba(255,255,255,.78);padding:26px 12px;">יש להזין מספר שלם וחיובי.</div>`;
+      return;
+    }
+
+    const maxExtra = Number(maxExtraEl.value);
+    const plan = bestPlan(total, maxExtra);
+
+    if (!plan) {
+      resultCard.innerHTML = `
+        <div class="section-label">המלצה מיידית</div>
+        <div class="empty" style="color:rgba(255,255,255,.78);padding:26px 12px;">לא נמצא צירוף בטווח השלמה של ${maxExtra} ${pluralPoints(maxExtra)}.</div>`;
+      return;
+    }
+
+    const instructionValue = plan.extra > 0
+      ? `מוצר ב־${plan.extra} ${pluralPoints(plan.extra)}`
+      : 'אין צורך להוסיף מוצר';
+    const chipClass = plan.extra > 0 ? 'warn' : 'exact';
+    const chipText = plan.extra > 0 ? `+${plan.extra} ${pluralPoints(plan.extra)}` : 'מדויק';
+
+    const alternatives = usefulAlternatives(total, maxExtra, plan);
+    const alternativesHtml = alternatives.length ? `
+      <div class="options-title">אפשרויות נוספות</div>
+      <div class="payment-options">
+        ${alternatives.map((alt, index) => `
+          <div class="payment-option">
+            <div class="payment-option-head">
+              <div class="payment-option-action ${alt.extra === 0 ? 'exact' : ''}">${alt.extra === 0 ? 'ללא הוספת מוצר' : `הוסף ${alt.extra} ${pluralPoints(alt.extra)}`}</div>
+              <div class="payment-option-badge">חלופה ${index + 1}</div>
+            </div>
+            <div class="payment-option-main">
+              <span>${alt.tens} × תלוש 10</span>
+              <span>${alt.sevens} × תלוש 7</span>
+            </div>
+            <div class="payment-option-meta">סה״כ ${alt.total} נקודות · ${alt.tens + alt.sevens} תלושים</div>
+          </div>`).join('')}
+      </div>` : '';
+
+    resultCard.innerHTML = `
+      <div class="section-label">המלצה מיידית</div>
+      <div class="hero-header">
+        <div class="hero-total">סה״כ בקופה<strong>${total}</strong></div>
+        <div class="status-chip ${chipClass}">${chipText}</div>
+      </div>
+
+      <div class="instruction">
+        <div class="title">פעולה מומלצת</div>
+        <div class="value">${instructionValue}</div>
+      </div>
+
+      <div class="coupon-grid">
+        <div class="coupon-box">
+          <div class="caption">תלושי 10</div>
+          <div class="count">${plan.tens}</div>
+          <div class="unit">להגיש לקופה</div>
+        </div>
+        <div class="coupon-box">
+          <div class="caption">תלושי 7</div>
+          <div class="count">${plan.sevens}</div>
+          <div class="unit">להגיש לקופה</div>
+        </div>
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-item">
+          <div class="k">סה״כ לתשלום</div>
+          <div class="v">${plan.total} נקודות</div>
+        </div>
+        <div class="summary-item">
+          <div class="k">מספר תלושים</div>
+          <div class="v">${plan.tens + plan.sevens}</div>
+        </div>
+      </div>
+      ${alternativesHtml}
+      <button type="button" class="edit-total-btn" id="editTotalBtn">שנה סכום</button>
+    `;
+
+    document.getElementById('editTotalBtn').addEventListener('click', () => {
+      totalEl.focus();
+      totalEl.select();
+      totalEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+
+    saveHistory({ input: total, ...plan });
+  }
+
+  function saveHistory(item) {
+    const key = `${item.input}-${item.tens}-${item.sevens}-${item.extra}`;
+    history = history.filter(x => `${x.input}-${x.tens}-${x.sevens}-${x.extra}` !== key);
+    history.unshift(item);
+    history = history.slice(0, 10);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    renderHistory();
+  }
+
+  function renderHistory() {
+    if (!history.length) {
+      historyEl.className = 'empty';
+      historyEl.innerHTML = 'עדיין אין היסטוריה.';
+      return;
+    }
+
+    historyEl.className = 'history-list';
+    historyEl.innerHTML = history.map(item => `
+      <button type="button" class="history-item" data-history="${item.input}" style="text-align:inherit;">
+        <div>
+          <div class="history-main">${item.input} נק׳ → ${item.tens}×10, ${item.sevens}×7</div>
+          <div class="history-sub">${item.extra ? `השלמה של ${item.extra} ${pluralPoints(item.extra)}` : 'תשלום מדויק'} · סה״כ לתשלום ${item.total}</div>
+        </div>
+        <div style="color:var(--accent);font-weight:900;white-space:nowrap;">פתח</div>
+      </button>`).join('');
+    historyEl.querySelectorAll('[data-history]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        totalEl.value = btn.getAttribute('data-history');
+        renderResult();
+        totalEl.focus();
+      });
+    });
+  }
+
+  document.querySelectorAll('[data-add]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const add = Number(btn.getAttribute('data-add'));
+      const current = Number(totalEl.value || '0');
+      totalEl.value = String(Math.max(0, current + add));
+      renderResult();
+    });
+  });
+
+  document.querySelectorAll('[data-sub]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const sub = Number(btn.getAttribute('data-sub'));
+      const current = Number(totalEl.value || '0');
+      totalEl.value = String(Math.max(0, current - sub));
+      renderResult();
+    });
+  });
+
+  document.querySelectorAll('[data-sample]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      totalEl.value = btn.getAttribute('data-sample');
+      renderResult();
+    });
+  });
+
+  document.getElementById('backspace').addEventListener('click', () => {
+    totalEl.value = totalEl.value.slice(0, -1);
+    renderResult();
+  });
+
+  document.getElementById('clear').addEventListener('click', () => {
+    totalEl.value = '';
+    renderResult();
+    totalEl.focus();
+  });
+
+  document.getElementById('clearHistory').addEventListener('click', () => {
+    history = [];
+    localStorage.removeItem(HISTORY_KEY);
+    renderHistory();
+  });
+
+  totalEl.addEventListener('input', renderResult);
+  maxExtraEl.addEventListener('change', renderResult);
+
+  renderHistory();
+  renderResult();
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+    });
+  }
+})();
+</script>
+</body>
+</html>
