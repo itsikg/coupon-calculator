@@ -4,7 +4,12 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#17342d" />
-  <title>מחשבון תלושים</title>
+  <link rel="manifest" href="./manifest.webmanifest" />
+<link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="תלושים" />
+<title>מחשבון תלושים</title>
   <style>
     :root{
       --bg-1:#f4efe7;
@@ -283,69 +288,6 @@
       line-height:1.35;
     }
 
-    .options-title{
-      margin-top:14px;
-      margin-bottom:8px;
-      color:rgba(255,255,255,.76);
-      font-size:12px;
-      font-weight:900;
-      letter-spacing:.02em;
-    }
-
-    .payment-options{
-      display:grid;
-      gap:8px;
-    }
-
-    .payment-option{
-      background:rgba(255,255,255,.95);
-      border:1px solid rgba(255,255,255,.78);
-      border-radius:17px;
-      padding:12px 13px;
-      color:var(--text);
-    }
-
-    .payment-option-head{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      margin-bottom:7px;
-    }
-
-    .payment-option-badge{
-      font-size:11px;
-      font-weight:900;
-      color:var(--brand);
-      background:rgba(23,52,45,.08);
-      border-radius:999px;
-      padding:5px 8px;
-      white-space:nowrap;
-    }
-
-    .payment-option-action{
-      font-size:13px;
-      font-weight:900;
-      color:var(--warn);
-    }
-
-    .payment-option-action.exact{color:var(--good)}
-
-    .payment-option-main{
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      color:var(--brand);
-      font-size:16px;
-      font-weight:1000;
-    }
-
-    .payment-option-meta{
-      margin-top:6px;
-      color:var(--muted);
-      font-size:12px;
-    }
-
     .edit-total-btn{
       width:100%;
       margin-top:12px;
@@ -611,13 +553,13 @@
         <div class="settings-row">
           <div>
             <strong>מקסימום השלמה</strong>
-            <p>כמה נקודות מותר להוסיף באמצעות מוצר קטן כדי להגיע לשילוב יעיל עם פחות תלושים, ובתוך זה פחות תלושי 7.</p>
+            <p>כמה נקודות מותר להוסיף באמצעות מוצר קטן כדי להפחית את מספר תלושי ה־7.</p>
           </div>
           <select id="maxExtra">
             <option value="0">0</option>
             <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3" selected>3</option>
+            <option value="2" selected>2</option>
+            <option value="3">3</option>
             <option value="4">4</option>
             <option value="5">5</option>
           </select>
@@ -662,50 +604,19 @@
     return best;
   }
 
-  function paymentCandidates(total, maxExtra) {
+  function bestPlan(total, maxExtra) {
     const candidates = [];
     for (let extra = 0; extra <= maxExtra; extra++) {
-      const target = total + extra;
-      for (let sevens = 0; sevens <= Math.floor(target / 7); sevens++) {
-        const rem = target - 7 * sevens;
-        if (rem >= 0 && rem % 10 === 0) {
-          const tens = rem / 10;
-          candidates.push({ tens, sevens, total: target, extra, couponCount: tens + sevens });
-        }
-      }
+      const exact = bestExact(total + extra);
+      if (exact) candidates.push({ ...exact, extra });
     }
+    if (!candidates.length) return null;
     candidates.sort((a,b) =>
-      a.couponCount - b.couponCount ||
       a.sevens - b.sevens ||
       a.extra - b.extra ||
-      b.tens - a.tens
+      a.tens - b.tens
     );
-    return candidates;
-  }
-
-  function bestPlan(total, maxExtra) {
-    return paymentCandidates(total, maxExtra)[0] || null;
-  }
-
-  // Keep meaningful trade-offs. An option is hidden only when another one is
-  // no worse in total coupon count, 7-point coupons and added points — and better in at least one.
-  function usefulAlternatives(total, maxExtra, selectedPlan) {
-    const all = paymentCandidates(total, maxExtra);
-    const frontier = all.filter(c => !all.some(other => {
-      if (other === c) return false;
-      const noWorse = other.couponCount <= c.couponCount && other.sevens <= c.sevens && other.extra <= c.extra;
-      const strictlyBetter = other.couponCount < c.couponCount || other.sevens < c.sevens || other.extra < c.extra;
-      return noWorse && strictlyBetter;
-    }));
-
-    return frontier
-      .filter(c => !(c.tens === selectedPlan.tens && c.sevens === selectedPlan.sevens && c.extra === selectedPlan.extra))
-      .sort((a,b) =>
-        a.couponCount - b.couponCount ||
-        a.sevens - b.sevens ||
-        a.extra - b.extra
-      )
-      .slice(0, 3);
+    return candidates[0];
   }
 
   function renderResult() {
@@ -727,6 +638,7 @@
 
     const maxExtra = Number(maxExtraEl.value);
     const plan = bestPlan(total, maxExtra);
+    const exact = bestExact(total);
 
     if (!plan) {
       resultCard.innerHTML = `
@@ -735,29 +647,38 @@
       return;
     }
 
-    const instructionValue = plan.extra > 0
-      ? `מוצר ב־${plan.extra} ${pluralPoints(plan.extra)}`
-      : 'אין צורך להוסיף מוצר';
-    const chipClass = plan.extra > 0 ? 'warn' : 'exact';
-    const chipText = plan.extra > 0 ? `+${plan.extra} ${pluralPoints(plan.extra)}` : 'מדויק';
+    let instructionTitle = 'תשלום מדויק';
+    let instructionValue = 'אין צורך להוסיף מוצר';
+    let chipClass = 'exact';
+    let chipText = 'מדויק';
 
-    const alternatives = usefulAlternatives(total, maxExtra, plan);
-    const alternativesHtml = alternatives.length ? `
-      <div class="options-title">אפשרויות נוספות</div>
-      <div class="payment-options">
-        ${alternatives.map((alt, index) => `
-          <div class="payment-option">
-            <div class="payment-option-head">
-              <div class="payment-option-action ${alt.extra === 0 ? 'exact' : ''}">${alt.extra === 0 ? 'ללא הוספת מוצר' : `הוסף ${alt.extra} ${pluralPoints(alt.extra)}`}</div>
-              <div class="payment-option-badge">חלופה ${index + 1}</div>
-            </div>
-            <div class="payment-option-main">
-              <span>${alt.tens} × תלוש 10</span>
-              <span>${alt.sevens} × תלוש 7</span>
-            </div>
-            <div class="payment-option-meta">סה״כ ${alt.total} נקודות · ${alt.tens + alt.sevens} תלושים</div>
-          </div>`).join('')}
-      </div>` : '';
+    if (plan.extra > 0) {
+      instructionTitle = 'כדאי להוסיף';
+      instructionValue = `מוצר ב־${plan.extra} ${pluralPoints(plan.extra)}`;
+      chipClass = 'warn';
+      chipText = `+${plan.extra} ${pluralPoints(plan.extra)}`;
+    }
+
+    let altHtml = '';
+    const sameAsExact = exact && plan.extra === 0 && exact.tens === plan.tens && exact.sevens === plan.sevens;
+
+    if (exact && !sameAsExact) {
+      altHtml = `
+        <div class="alt-box">
+          <div class="alt-title">חלופה מדויקת ללא הוספת מוצר</div>
+          <div class="alt-main">
+            <span>${exact.tens} × תלוש 10</span>
+            <span>${exact.sevens} × תלוש 7</span>
+          </div>
+          <div class="alt-note">אפשרות זו מדויקת, אבל משתמשת ביותר תלושי 7 מההמלצה הראשית.</div>
+        </div>`;
+    } else if (!exact && plan.extra > 0) {
+      altHtml = `
+        <div class="alt-box">
+          <div class="alt-title">ללא הוספת מוצר</div>
+          <div class="alt-note">אין צירוף מדויק של תלושי 10 ו־7 לסכום הזה, לכן ההשלמה היא הפתרון המומלץ.</div>
+        </div>`;
+    }
 
     resultCard.innerHTML = `
       <div class="section-label">המלצה מיידית</div>
@@ -794,7 +715,7 @@
           <div class="v">${plan.tens + plan.sevens}</div>
         </div>
       </div>
-      ${alternativesHtml}
+      ${altHtml}
       <button type="button" class="edit-total-btn" id="editTotalBtn">שנה סכום</button>
     `;
 
